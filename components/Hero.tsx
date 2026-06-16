@@ -19,16 +19,7 @@ export default function Hero() {
   };
 
   const handleDownloadCV = () => {
-    if (lang === "vi") {
-      const a = document.createElement("a");
-      a.href = "/cv-vi.pdf";
-      a.download = "Nguyen-Thanh-Nhan-CV.pdf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else {
-      window.open(`/cv/senior?lang=en&autoprint=true`, "_blank");
-    }
+    window.open(`/cv/senior?lang=${lang}&autoprint=true`, "_blank");
   };
 
   return (
