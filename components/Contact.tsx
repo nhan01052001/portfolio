@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { Mail, GitFork, Link, Phone, Send, CheckCircle2 } from "lucide-react";
+import emailjs from "@emailjs/browser";
+import { Mail, GitFork, Link, Phone, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Contact() {
@@ -28,10 +29,24 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("sending");
-    // TODO: Replace with EmailJS / Resend integration
-    await new Promise((r) => setTimeout(r, 1200));
-    setStatus("sent");
-    setForm({ name: "", email: "", message: "" });
+    try {
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        {
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          title: `New message from ${form.name}`,
+          time: new Date().toLocaleString("vi-VN"),
+        },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+      setStatus("sent");
+      setForm({ name: "", email: "", message: "" });
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (
@@ -130,6 +145,12 @@ export default function Contact() {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 transition-colors text-sm resize-none"
                   />
                 </div>
+                {status === "error" && (
+                  <div className="flex items-center gap-2 text-red-500 text-sm bg-red-50 dark:bg-red-900/20 px-4 py-3 rounded-xl">
+                    <AlertCircle size={16} />
+                    <span>Gửi thất bại, vui lòng thử lại.</span>
+                  </div>
+                )}
                 <button
                   type="submit"
                   disabled={status === "sending"}
